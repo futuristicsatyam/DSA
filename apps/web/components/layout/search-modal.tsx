@@ -72,7 +72,9 @@ export function SearchModal() {
                 <Input
                   autoFocus
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+  setQuery(event.target.value)
+}
                   placeholder="Search topics, editorials, tags..."
                   className="border-0 px-0 focus:ring-0"
                 />
