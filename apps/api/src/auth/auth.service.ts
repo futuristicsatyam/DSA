@@ -9,7 +9,6 @@ import {
 import { OtpType, Prisma, Role, User } from "@prisma/client";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { OtpType, Role, User } from "@prisma/client";
 import { Response } from "express";
 import { PrismaService } from "../database/prisma.service";
 import { compareHash, hashValue } from "../common/utils/hash";
