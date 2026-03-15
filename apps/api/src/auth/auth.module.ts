@@ -17,7 +17,7 @@ import { SmsService } from "../notifications/sms.service";
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.getOrThrow("JWT_ACCESS_SECRET")
+        secret: configService.getOrThrow<string>("JWT_ACCESS_SECRET")
       })
     })
   ],
