@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, TooManyRequestsException } from "@nestjs/common";
+import { BadRequestException, HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { OtpType } from "@prisma/client";
 import { PrismaService } from "../database/prisma.service";
 
@@ -22,7 +22,10 @@ export class OtpService {
     });
 
     if (recentCount >= 5) {
-      throw new TooManyRequestsException("Too many OTP requests. Please try again later.");
+      throw new HttpException(
+        "Too many OTP requests. Please try again later.",
+        HttpStatus.TOO_MANY_REQUESTS
+      );
     }
 
     await this.prisma.otp.updateMany({
@@ -66,7 +69,10 @@ export class OtpService {
     }
 
     if (otp.attempts >= 5) {
-      throw new TooManyRequestsException("Maximum OTP attempts exceeded");
+      throw new HttpException(
+        "Maximum OTP attempts exceeded",
+        HttpStatus.TOO_MANY_REQUESTS
+      );
     }
 
     if (otp.code !== code) {
