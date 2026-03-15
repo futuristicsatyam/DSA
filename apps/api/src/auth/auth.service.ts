@@ -36,25 +36,28 @@ export class AuthService {
   }
 
   private async generateTokens(user: Pick<User, "id" | "email" | "phone" | "role">) {
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      phone: user.phone,
-      role: user.role
-    };
+  const payload: JwtPayload = {
+    sub: user.id,
+    email: user.email,
+    phone: user.phone,
+    role: user.role
+  };
 
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow<string>("jwt.accessSecret"),
-      expiresIn: this.configService.getOrThrow<string>("jwt.accessTtl")
-    });
+  const accessExpiresIn = this.configService.getOrThrow<string>("jwt.accessTtl") as any;
+  const refreshExpiresIn = this.configService.getOrThrow<string>("jwt.refreshTtl") as any;
 
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow<string>("jwt.refreshSecret"),
-      expiresIn: this.configService.getOrThrow<string>("jwt.refreshTtl")
-    });
+  const accessToken = await this.jwtService.signAsync(payload, {
+    secret: this.configService.getOrThrow<string>("jwt.accessSecret"),
+    expiresIn: accessExpiresIn
+  });
 
-    return { accessToken, refreshToken };
-  }
+  const refreshToken = await this.jwtService.signAsync(payload, {
+    secret: this.configService.getOrThrow<string>("jwt.refreshSecret"),
+    expiresIn: refreshExpiresIn
+  });
+
+  return { accessToken, refreshToken };
+}
 
   private getCookieOptions(httpOnly: boolean, maxAge: number) {
     const cookieDomain = this.configService.get<string>("cookie.domain");
