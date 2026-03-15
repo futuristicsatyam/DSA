@@ -1,9 +1,12 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   UnauthorizedException
 } from "@nestjs/common";
+
+import { OtpType, Prisma, Role, User } from "@prisma/client";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { OtpType, Role, User } from "@prisma/client";
@@ -98,21 +101,24 @@ export class AuthService {
   }
 
   async signup(dto: SignupDto, response: Response) {
-    if (dto.password !== dto.confirmPassword) {
-      throw new BadRequestException("Passwords do not match");
+  if (dto.password !== dto.confirmPassword) {
+    throw new BadRequestException("Passwords do not match");
+  }
+
+  const existingUser = await this.prisma.user.findFirst({
+    where: {
+      OR: [{ email: dto.email }, { phone: dto.phoneNumber }]
     }
+  });
 
-    const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ email: dto.email }, { phone: dto.phoneNumber }]
-      }
-    });
+  if (existingUser) {
+    throw new BadRequestException("Email or phone number already registered");
+  }
 
-    if (existingUser) {
-      throw new BadRequestException("Email or phone number already registered");
-    }
+  let user: User;
 
-    const user = await this.prisma.user.create({
+  try {
+    user = await this.prisma.user.create({
       data: {
         name: dto.fullName,
         email: dto.email,
@@ -120,25 +126,36 @@ export class AuthService {
         passwordHash: await hashValue(dto.password)
       }
     });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      throw new ConflictException("Email or phone number already exists");
+    }
 
-    const { accessToken, refreshToken } = await this.generateTokens(user);
-
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { refreshTokenHash: await hashValue(refreshToken) }
-    });
-
-    this.setAuthCookies(response, accessToken, refreshToken, user.role);
-    await this.sendEmailOtp({ target: dto.email, type: OtpType.EMAIL_VERIFY }, user.id);
-    await this.sendPhoneOtp({ target: dto.phoneNumber, type: OtpType.PHONE_VERIFY }, user.id);
-
-    return {
-      message: "Signup successful",
-      data: {
-        user: await this.safeUser(user.id)
-      }
-    };
+    throw error;
   }
+
+  const { accessToken, refreshToken } = await this.generateTokens(user);
+
+  await this.prisma.user.update({
+    where: { id: user.id },
+    data: { refreshTokenHash: await hashValue(refreshToken) }
+  });
+
+  this.setAuthCookies(response, accessToken, refreshToken, user.role);
+
+  await this.sendEmailOtp({ target: dto.email, type: OtpType.EMAIL_VERIFY }, user.id);
+  await this.sendPhoneOtp({ target: dto.phoneNumber, type: OtpType.PHONE_VERIFY }, user.id);
+
+  return {
+    message: "Signup successful",
+    data: {
+      user: await this.safeUser(user.id)
+    }
+  };
+}
 
   async login(dto: LoginDto, response: Response) {
     const where = this.isEmail(dto.identifier) ? { email: dto.identifier } : { phone: dto.identifier };
