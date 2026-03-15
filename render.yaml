@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: dsa-suite-api
+    runtime: node
+    rootDir: .
+    plan: free
+    buildCommand: corepack enable && pnpm install --frozen-lockfile=false && pnpm --filter @apps/api exec prisma generate && pnpm --filter @apps/api build && pnpm --filter @apps/api prisma:deploy
+    startCommand: pnpm --filter @apps/api start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: FEATURE_ONLINE_JUDGE
+        value: false
