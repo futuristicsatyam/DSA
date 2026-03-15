@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
-    "start": "node dist/main",
-    "start:prod": "node dist/main",
+    "start": "node dist/src/main.js",
+    "start:prod": "node dist/src/main.js",
     "test": "jest",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
