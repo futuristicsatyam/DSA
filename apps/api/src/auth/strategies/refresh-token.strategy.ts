@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
-import { ExtractJwt, Strategy } from "passport-jwt";
+import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
+import { ExtractJwt, Strategy } from "passport-jwt";
 import { REFRESH_TOKEN_COOKIE } from "../../common/constants";
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
 
@@ -14,7 +14,7 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, "jwt-refres
         (request: Request) => request?.cookies?.[REFRESH_TOKEN_COOKIE] ?? null
       ]),
       ignoreExpiration: false,
-      secretOrKey: secretOrKey: configService.getOrThrow("JWT_REFRESH_SECRET")
+      secretOrKey: configService.getOrThrow<string>("JWT_REFRESH_SECRET"),
       passReqToCallback: true
     });
   }
