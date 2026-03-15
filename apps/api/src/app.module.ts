@@ -3,7 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "./auth/auth.module";
 import { BookmarksModule } from "./bookmarks/bookmarks.module";
 import { ContentModule } from "./content/content.module";
-import { PrismaService } from "./database/prisma.service";
+import { DatabaseModule } from "./database/database.module";
 import { HealthController } from "./health.controller";
 
 @Module({
@@ -11,11 +11,11 @@ import { HealthController } from "./health.controller";
     ConfigModule.forRoot({
       isGlobal: true
     }),
+    DatabaseModule,
     AuthModule,
     ContentModule,
     BookmarksModule
   ],
-  controllers: [HealthController],
-  providers: [PrismaService]
+  controllers: [HealthController]
 })
 export class AppModule {}
