@@ -63,10 +63,8 @@ export class AuthService {
 
 private getCookieOptions(httpOnly: boolean, maxAge: number) {
   const cookieDomain = this.configService.get<string>("COOKIE_DOMAIN");
-  const secureRaw = this.configService.get<string>("COOKIE_SECURE");
   const sameSiteRaw = this.configService.get<string>("COOKIE_SAME_SITE");
 
-  const secure = secureRaw === "true";
   const sameSite =
     sameSiteRaw === "none" || sameSiteRaw === "strict" || sameSiteRaw === "lax"
       ? sameSiteRaw
