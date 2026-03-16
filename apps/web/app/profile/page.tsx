@@ -40,10 +40,15 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Profile" }]} />
+      <Breadcrumbs
+        items={[
+          { href: "/", label: "Home" },
+          { label: "Profile" }
+        ]}
+      />
 
       <div>
-        <h1 className="text-4xl font-semibold">Profile V2</h1>
+        <h1 className="text-4xl font-semibold">Profile V3</h1>
         <p className="mt-3 text-slate-600 dark:text-slate-300">
           View your account details and verification status.
         </p>
@@ -53,6 +58,7 @@ export default function ProfilePage() {
         <CardHeader>
           <CardTitle>Account details</CardTitle>
         </CardHeader>
+
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div>
             <p className="text-sm text-slate-500">Full name</p>
@@ -82,7 +88,9 @@ export default function ProfilePage() {
 
           <div>
             <p className="text-sm text-slate-500">Joined</p>
-            <p className="font-medium">{new Date(user.createdAt).toLocaleString()}</p>
+            <p className="font-medium">
+              {new Date(user.createdAt).toLocaleString()}
+            </p>
           </div>
 
           <div>
