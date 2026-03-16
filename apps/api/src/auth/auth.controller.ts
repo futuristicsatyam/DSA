@@ -1,15 +1,7 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Res,
-  UseGuards
-} from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Response } from "express";
+import { AuthGuard } from "@nestjs/passport";
 import { Public } from "../common/decorators/public.decorator";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { RefreshAuthGuard } from "../common/guards/refresh-auth.guard";
@@ -77,17 +69,22 @@ export class AuthController {
   @Public()
   @UseGuards(RefreshAuthGuard)
   @Post("refresh")
-  refresh(@CurrentUser() user: { sub: string; refreshToken: string }, @Res({ passthrough: true }) response: Response) {
+  refresh(
+    @CurrentUser() user: { sub: string; refreshToken: string },
+    @Res({ passthrough: true }) response: Response
+  ) {
     return this.authService.refresh(user.sub, user.refreshToken, response);
   }
 
   @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"))
   @Get("me")
   me(@CurrentUser() user: { sub: string }) {
     return this.authService.me(user.sub);
   }
 
   @ApiBearerAuth()
+  @UseGuards(AuthGuard("jwt"))
   @HttpCode(HttpStatus.OK)
   @Post("logout")
   logout(@CurrentUser() user: { sub: string }, @Res({ passthrough: true }) response: Response) {
