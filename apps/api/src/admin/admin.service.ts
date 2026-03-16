@@ -11,6 +11,25 @@ export class AdminService {
     private readonly contentService: ContentService
   ) {}
 
+  async getStats() {
+  const [users, topics, editorials, bookmarks] = await Promise.all([
+    this.prisma.user.count(),
+    this.prisma.topic.count(),
+    this.prisma.editorial.count(),
+    this.prisma.bookmark.count()
+  ]);
+
+  return {
+    message: "Admin stats fetched successfully",
+    data: {
+      users,
+      topics,
+      editorials,
+      bookmarks
+    }
+  };
+}
+
   async getAllEditorials() {
     const editorials = await this.prisma.editorial.findMany({
       orderBy: { updatedAt: "desc" },
