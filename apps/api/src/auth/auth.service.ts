@@ -84,7 +84,7 @@ private getCookieOptions(httpOnly: boolean, maxAge: number) {
 }
 
   private setAuthCookies(response: Response, accessToken: string, refreshToken: string, role: Role) {
-    response.cookie(ACCESS_TOKEN_COOKIE, accessToken, this.getCookieOptions(true, 15 * 60 * 1000));
+    response.cookie(ACCESS_TOKEN_COOKIE, accessToken, this.getCookieOptions(true, 24 * 60 * 60 * 1000));
 
     response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, this.getCookieOptions(true, 30 * 24 * 60 * 60 * 1000));
 
