@@ -43,7 +43,7 @@ export default function ProfilePage() {
       <Breadcrumbs items={[{ href: "/", label: "Home" }, { label: "Profile" }]} />
 
       <div>
-        <h1 className="text-4xl font-semibold">Profile</h1>
+        <h1 className="text-4xl font-semibold">Profile V2</h1>
         <p className="mt-3 text-slate-600 dark:text-slate-300">
           View your account details and verification status.
         </p>
