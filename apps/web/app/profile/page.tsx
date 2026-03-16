@@ -5,33 +5,30 @@ import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@repo/ui";
 import { apiFetch } from "@/lib/api/client";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 
-type ProfileResponse = {
-  message: string;
-  data: {
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      phone: string;
-      emailVerified: boolean;
-      phoneVerified: boolean;
-      role: string;
-      createdAt: string;
-    };
+type ProfileData = {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    emailVerified: boolean;
+    phoneVerified: boolean;
+    role: string;
+    createdAt: string;
   };
 };
 
 export default function ProfilePage() {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["me"],
-    queryFn: () => apiFetch<ProfileResponse>("/api/v1/auth/me")
+    queryKey: ["profile"],
+    queryFn: () => apiFetch<ProfileData>("/api/v1/auth/me")
   });
 
   if (isLoading) {
     return <Skeleton className="h-[420px]" />;
   }
 
-  if (isError || !data?.data?.user) {
+  if (isError || !data?.user) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
         Failed to load profile.
@@ -39,7 +36,7 @@ export default function ProfilePage() {
     );
   }
 
-  const user = data.data.user;
+  const user = data.user;
 
   return (
     <div className="space-y-6">
@@ -85,9 +82,7 @@ export default function ProfilePage() {
 
           <div>
             <p className="text-sm text-slate-500">Joined</p>
-            <p className="font-medium">
-              {new Date(user.createdAt).toLocaleString()}
-            </p>
+            <p className="font-medium">{new Date(user.createdAt).toLocaleString()}</p>
           </div>
 
           <div>
