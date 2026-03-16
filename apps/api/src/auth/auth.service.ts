@@ -61,22 +61,29 @@ export class AuthService {
   return { accessToken, refreshToken };
 }
 
-  private getCookieOptions(httpOnly: boolean, maxAge: number) {
-    const cookieDomain = this.configService.get<string>("cookie.domain");
-    const secure = this.configService.get<boolean>("cookie.secure");
-    const sameSite = this.configService.get<"lax" | "none" | "strict">("cookie.sameSite") ?? "lax";
-    const normalizedDomain = cookieDomain?.trim();
-    const shouldSetDomain = Boolean(normalizedDomain && normalizedDomain !== "localhost");
+private getCookieOptions(httpOnly: boolean, maxAge: number) {
+  const cookieDomain = this.configService.get<string>("COOKIE_DOMAIN");
+  const secureRaw = this.configService.get<string>("COOKIE_SECURE");
+  const sameSiteRaw = this.configService.get<string>("COOKIE_SAME_SITE");
 
-    return {
-      httpOnly,
-      sameSite,
-      secure: sameSite === "none" ? true : secure,
-      ...(shouldSetDomain ? { domain: normalizedDomain } : {}),
-      path: "/",
-      maxAge
-    };
-  }
+  const secure = secureRaw === "true";
+  const sameSite =
+    sameSiteRaw === "none" || sameSiteRaw === "strict" || sameSiteRaw === "lax"
+      ? sameSiteRaw
+      : "none";
+
+  const normalizedDomain = cookieDomain?.trim();
+  const shouldSetDomain = Boolean(normalizedDomain);
+
+  return {
+    httpOnly,
+    sameSite,
+    secure: true,
+    ...(shouldSetDomain ? { domain: normalizedDomain } : {}),
+    path: "/",
+    maxAge
+  } as const;
+}
 
   private setAuthCookies(response: Response, accessToken: string, refreshToken: string, role: Role) {
     response.cookie(ACCESS_TOKEN_COOKIE, accessToken, this.getCookieOptions(true, 15 * 60 * 1000));
@@ -87,17 +94,17 @@ export class AuthService {
   }
 
   clearAuthCookies(response: Response) {
-    const cookieDomain = this.configService.get<string>("cookie.domain");
-    const normalizedDomain = cookieDomain?.trim();
-    const shouldSetDomain = Boolean(normalizedDomain && normalizedDomain !== "localhost");
+  const cookieDomain = this.configService.get<string>("COOKIE_DOMAIN");
+  const normalizedDomain = cookieDomain?.trim();
+  const shouldSetDomain = Boolean(normalizedDomain);
 
-    for (const cookie of [ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, USER_ROLE_COOKIE]) {
-      response.clearCookie(cookie, {
-        ...(shouldSetDomain ? { domain: normalizedDomain } : {}),
-        path: "/"
-      });
-    }
+  for (const cookie of [ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, USER_ROLE_COOKIE]) {
+    response.clearCookie(cookie, {
+      ...(shouldSetDomain ? { domain: normalizedDomain } : {}),
+      path: "/"
+    });
   }
+}
 
   async signup(dto: SignupDto, response: Response) {
   if (dto.password !== dto.confirmPassword) {
