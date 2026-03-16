@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,7 +15,6 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export function LoginForm() {
-  const router = useRouter();
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -26,24 +24,27 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: FormValues) {
-    try {
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
-      });
+  try {
+    const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values)
+    });
 
-      const payload = await response.json();
-      if (!response.ok) throw new Error(Array.isArray(payload.message) ? payload.message.join(", ") : payload.message);
-
-      toast.success("Logged in successfully");
-      router.push("/dashboard");
-      router.refresh();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Login failed");
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        Array.isArray(payload.message) ? payload.message.join(", ") : payload.message
+      );
     }
+
+    toast.success("Logged in successfully");
+    window.location.href = "/dashboard";
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : "Login failed");
   }
+}
 
   return (
     <Card className="mx-auto max-w-lg">
