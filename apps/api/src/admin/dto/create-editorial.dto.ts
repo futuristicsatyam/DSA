@@ -1,36 +1,41 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsArray, IsBoolean, IsInt, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Min } from "class-validator";
 
 export class CreateEditorialDto {
   @ApiProperty()
   @IsString()
-  topicId!: string;
+  topicId: string;
 
   @ApiProperty()
   @IsString()
-  @MaxLength(180)
-  title!: string;
+  title: string;
 
   @ApiProperty()
   @IsString()
-  summary!: string;
+  slug: string;
 
   @ApiProperty()
   @IsString()
-  markdownContent!: string;
+  summary: string;
 
-  @ApiProperty({ type: [String] })
+  @ApiProperty()
+  @IsString()
+  markdownContent: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
   @IsArray()
-  tags!: string[];
+  @IsString({ each: true })
+  tags?: string[];
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
+  @Min(1)
   estimatedMinutes?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsBoolean()
-  published!: boolean;
+  published?: boolean;
 }
-
-export class UpdateEditorialDto extends CreateEditorialDto {}
