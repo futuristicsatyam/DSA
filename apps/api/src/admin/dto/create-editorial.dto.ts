@@ -4,23 +4,23 @@ import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Min } from "class-vali
 export class CreateEditorialDto {
   @ApiProperty()
   @IsString()
-  topicId: string;
+  topicId!: string;
 
   @ApiProperty()
   @IsString()
-  title: string;
+  title!: string;
 
   @ApiProperty()
   @IsString()
-  slug: string;
+  slug!: string;
 
   @ApiProperty()
   @IsString()
-  summary: string;
+  summary!: string;
 
   @ApiProperty()
   @IsString()
-  markdownContent: string;
+  markdownContent!: string;
 
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
