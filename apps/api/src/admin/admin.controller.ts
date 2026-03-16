@@ -13,6 +13,11 @@ import { AdminRoleGuard } from "./guards/admin-role.guard";
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @Get("stats")
+  getStats() {
+    return this.adminService.getStats();
+  }
+
   @Get("editorials")
   getAllEditorials() {
     return this.adminService.getAllEditorials();
