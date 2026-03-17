@@ -1,14 +1,16 @@
 # .github/workflows/seed.yml
-# Run this manually from GitHub Actions tab to seed the production database
-
 name: Seed Database
 
 on:
-  workflow_dispatch: # manual trigger only — never runs automatically
+  workflow_dispatch:
 
 jobs:
   seed:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/api
 
     steps:
       - name: Checkout code
@@ -17,24 +19,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
+          node-version: '22'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       - name: Generate Prisma client
-        working-directory: apps/api
-        run: npx prisma generate
+        run: npx prisma generate --schema prisma/schema.prisma
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Run database seed
-        working-directory: apps/api
-        run: npx prisma db seed
+      - name: Run seed
+        run: npx ts-node --compiler-options '{"module":"CommonJS"}' prisma/seed.ts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
