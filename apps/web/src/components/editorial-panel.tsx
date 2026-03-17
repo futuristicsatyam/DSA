@@ -1,8 +1,7 @@
-
 'use client';
 // apps/web/src/components/editorial-panel.tsx
 
-import { Clock, Tag, BarChart2, Bookmark, BookmarkCheck, ArrowRight } from 'lucide-react';
+import { Clock, Tag, BarChart2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Topic, Editorial, Difficulty } from '@/lib/content-api';
 import { MarkdownRenderer } from './markdown-renderer';
@@ -10,18 +9,24 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { BookmarkButton } from './bookmark-button';
 
+// ✅ Fixed: matches your actual Prisma schema enum values
 const DIFFICULTY_STYLES: Record<Difficulty, string> = {
-  EASY: 'text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400',
-  MEDIUM: 'text-yellow-700 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400',
-  HARD: 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400',
+  BEGINNER:     'text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400',
+  INTERMEDIATE: 'text-yellow-700 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400',
+  ADVANCED:     'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400',
 };
 
+const DIFFICULTY_LABELS: Record<Difficulty, string> = {
+  BEGINNER:     'Beginner',
+  INTERMEDIATE: 'Intermediate',
+  ADVANCED:     'Advanced',
+};
+
+// ✅ Removed isBookmarked and onBookmark props — BookmarkButton handles this internally
 interface EditorialPanelProps {
   topic: Topic | null | undefined;
   editorial: Editorial | null | undefined;
   isLoading: boolean;
-  isBookmarked?: boolean;
-  onBookmark?: () => void;
   onMarkComplete?: () => void;
   isCompleted?: boolean;
 }
@@ -86,8 +91,6 @@ export function EditorialPanel({
   topic,
   editorial,
   isLoading,
-  isBookmarked = false,
-  onBookmark,
   onMarkComplete,
   isCompleted = false,
 }: EditorialPanelProps) {
@@ -103,26 +106,20 @@ export function EditorialPanel({
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-2xl font-bold leading-tight">{topic.title}</h1>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {onBookmark && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onBookmark}
-                aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark topic'}
-                className={cn(isBookmarked && 'text-indigo-600')}
-              >
-                {isBookmarked ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
-              </Button>
-            )}
-          </div>
+
+          {/* ✅ BookmarkButton handles all bookmark state internally */}
+          <BookmarkButton
+            topicId={topic.id}
+            variant="icon"
+            className="flex-shrink-0 mt-0.5"
+          />
         </div>
 
         {/* Metadata row */}
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {topic.difficulty && (
             <span className={cn('px-2.5 py-1 rounded-full text-xs font-semibold', DIFFICULTY_STYLES[topic.difficulty])}>
-              {topic.difficulty}
+              {DIFFICULTY_LABELS[topic.difficulty]}
             </span>
           )}
           {editorial?.estimatedMinutes && (
@@ -152,21 +149,27 @@ export function EditorialPanel({
           </p>
         )}
 
-        {/* Mark complete */}
-        {onMarkComplete && (
-          <Button
-            variant={isCompleted ? 'secondary' : 'default'}
-            size="sm"
-            onClick={onMarkComplete}
-            className={cn(
-              'gap-2',
-              !isCompleted && 'bg-indigo-600 hover:bg-indigo-700 text-white',
-            )}
-          >
-            <BarChart2 className="w-4 h-4" />
-            {isCompleted ? 'Marked as complete ✓' : 'Mark as complete'}
-          </Button>
-        )}
+        {/* Action row */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Mark complete */}
+          {onMarkComplete && (
+            <Button
+              variant={isCompleted ? 'secondary' : 'default'}
+              size="sm"
+              onClick={onMarkComplete}
+              className={cn(
+                'gap-2',
+                !isCompleted && 'bg-indigo-600 hover:bg-indigo-700 text-white',
+              )}
+            >
+              <BarChart2 className="w-4 h-4" />
+              {isCompleted ? 'Marked as complete ✓' : 'Mark as complete'}
+            </Button>
+          )}
+
+          {/* ✅ Bookmark as a labeled button too */}
+          <BookmarkButton topicId={topic.id} variant="button" />
+        </div>
       </div>
 
       <hr className="border-border" />
