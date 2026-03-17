@@ -8,6 +8,7 @@ import { Topic, Editorial, Difficulty } from '@/lib/content-api';
 import { MarkdownRenderer } from './markdown-renderer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { BookmarkButton } from './bookmark-button';
 
 const DIFFICULTY_STYLES: Record<Difficulty, string> = {
   EASY: 'text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400',
