@@ -30,20 +30,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // On mount: try to refresh access token silently (user may have a valid cookie)
   useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await authApi.refresh();
-        setAccessToken(data.accessToken);
-        const { data: me } = await authApi.me();
-        setUser(me);
-      } catch {
-        // no valid session — that's fine
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+  (async () => {
+    try {
+      // Step 1 — silently get a new access token using the refresh cookie
+      const { data } = await authApi.refresh();
+      setAccessToken(data.accessToken);
+
+      // Step 2 — now fetch the user with that token
+      const { data: me } = await authApi.me();
+      setUser(me);
+    } catch {
+      // No valid session — that's fine, user stays null
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  })();
+}, []);
 
   const login = useCallback(
     async (identifier: string, password: string): Promise<AuthUser> => {
