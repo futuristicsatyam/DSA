@@ -1,4 +1,3 @@
-
 'use client';
 // apps/web/src/components/navbar.tsx
 
@@ -7,7 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   BookOpen, Menu, X, Moon, Sun, Search,
-  LayoutDashboard, User, LogOut, ChevronDown, Shield,
+  LayoutDashboard, User, LogOut, ChevronDown, Shield, Bookmark,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
@@ -124,6 +123,10 @@ export function Navbar() {
                     <DropdownMenuItem onClick={() => router.push('/dashboard')}>
                       <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
                     </DropdownMenuItem>
+                    {/* ✅ ADDED: Bookmarks link */}
+                    <DropdownMenuItem onClick={() => router.push('/bookmarks')}>
+                      <Bookmark className="w-4 h-4 mr-2" /> Bookmarks
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => router.push('/profile')}>
                       <User className="w-4 h-4 mr-2" /> Profile
                     </DropdownMenuItem>
@@ -169,7 +172,7 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile drawer ────────────────────────────────────────────────── */}
+      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border bg-background px-4 py-4 space-y-1">
           {NAV_LINKS.map((l) => (
@@ -193,6 +196,10 @@ export function Navbar() {
               <>
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-accent">
                   <LayoutDashboard className="w-4 h-4" /> Dashboard
+                </Link>
+                {/* ✅ ADDED: Bookmarks link in mobile drawer */}
+                <Link href="/bookmarks" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-accent">
+                  <Bookmark className="w-4 h-4" /> Bookmarks
                 </Link>
                 <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-accent">
                   <User className="w-4 h-4" /> Profile
