@@ -1,10 +1,11 @@
 // apps/web/src/lib/content-api.ts
+// FIXED: Difficulty enum matches your actual Prisma schema
 import { api } from './api';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 export type CategoryType = 'DSA' | 'CP' | 'GATE';
-export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD';
+
+// ⚠️ Your schema uses BEGINNER / INTERMEDIATE / ADVANCED — not EASY/MEDIUM/HARD
+export type Difficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 
 export interface Subject {
   id: string;
@@ -30,6 +31,7 @@ export interface Topic {
 export interface Editorial {
   id: string;
   topicId: string;
+  slug: string;
   title: string;
   summary: string | null;
   markdownContent: string;
@@ -47,32 +49,19 @@ export interface SearchResult {
   editorials: Editorial[];
 }
 
-// ── API calls ─────────────────────────────────────────────────────────────────
-
 export const contentApi = {
-  // DSA
-  getDsaSubjects: () =>
-    api.get<Subject[]>('/content/dsa/subjects'),
+  getDsaSubjects: () => api.get<Subject[]>('/content/dsa/subjects'),
   getDsaTopic: (slug: string) =>
     api.get<{ topic: Topic; editorial: Editorial | null }>(`/content/dsa/topics/${slug}`),
 
-  // CP
-  getCpSubjects: () =>
-    api.get<Subject[]>('/content/cp/subjects'),
+  getCpSubjects: () => api.get<Subject[]>('/content/cp/subjects'),
   getCpTopic: (slug: string) =>
     api.get<{ topic: Topic; editorial: Editorial | null }>(`/content/cp/topics/${slug}`),
 
-  // GATE
-  getGateSubjects: () =>
-    api.get<Subject[]>('/content/gate/subjects'),
+  getGateSubjects: () => api.get<Subject[]>('/content/gate/subjects'),
   getGateTopic: (slug: string) =>
     api.get<{ topic: Topic; editorial: Editorial | null }>(`/content/gate/topics/${slug}`),
 
-  // Editorial by slug
-  getEditorial: (slug: string) =>
-    api.get<Editorial>(`/content/editorials/${slug}`),
-
-  // Search
-  search: (q: string) =>
-    api.get<SearchResult>(`/content/search`, { params: { q } }),
+  getEditorial: (slug: string) => api.get<Editorial>(`/content/editorials/${slug}`),
+  search: (q: string) => api.get<SearchResult>('/content/search', { params: { q } }),
 };
