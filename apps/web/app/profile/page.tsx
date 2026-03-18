@@ -9,8 +9,8 @@ type ProfileData = {
   user: {
     id: string;
     name: string;
-    email: string;
-    phone: string;
+    email: string | null;
+    phone: string | null;
     emailVerified: boolean;
     phoneVerified: boolean;
     role: string;
@@ -19,7 +19,7 @@ type ProfileData = {
 };
 
 export default function ProfilePage() {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["profile"],
     queryFn: () => apiFetch<ProfileData>("/api/v1/auth/me")
   });
@@ -31,7 +31,10 @@ export default function ProfilePage() {
   if (isError || !data?.user) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-        Failed to load profile.
+        <p className="font-medium">Failed to load profile.</p>
+        <p className="mt-2 text-sm">
+          {error instanceof Error ? error.message : "Unknown error"}
+        </p>
       </div>
     );
   }
@@ -48,7 +51,7 @@ export default function ProfilePage() {
       />
 
       <div>
-        <h1 className="text-4xl font-semibold">Profile V3</h1>
+        <h1 className="text-4xl font-semibold">Profile</h1>
         <p className="mt-3 text-slate-600 dark:text-slate-300">
           View your account details and verification status.
         </p>
@@ -72,7 +75,7 @@ export default function ProfilePage() {
 
           <div>
             <p className="text-sm text-slate-500">Email</p>
-            <p className="font-medium">{user.email}</p>
+            <p className="font-medium">{user.email ?? "Not provided"}</p>
             <p className="text-sm text-slate-500">
               {user.emailVerified ? "Verified" : "Not verified"}
             </p>
@@ -80,7 +83,7 @@ export default function ProfilePage() {
 
           <div>
             <p className="text-sm text-slate-500">Phone</p>
-            <p className="font-medium">{user.phone}</p>
+            <p className="font-medium">{user.phone ?? "Not provided"}</p>
             <p className="text-sm text-slate-500">
               {user.phoneVerified ? "Verified" : "Not verified"}
             </p>
