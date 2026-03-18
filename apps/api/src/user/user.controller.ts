@@ -7,14 +7,14 @@ import {
 import {
   ApiTags, ApiBearerAuth, ApiOperation, ApiResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthGuard } from "@nestjs/passport";
 import { UserService } from './user.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('User')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard("jwt"))
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
