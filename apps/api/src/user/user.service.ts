@@ -8,6 +8,19 @@ import {
 import { PrismaService } from '../database/prisma.service';
 import * as bcrypt from 'bcrypt';
 
+// ── Inline DTOs (matching your controller imports) ────────────────────────────
+// These match the DTO classes in ./dto/update-profile.dto.ts
+// and ./dto/change-password.dto.ts that your controller already imports
+
+interface UpdateProfileDto {
+  name?: string;
+}
+
+interface ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+}
+
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
@@ -15,7 +28,10 @@ export class UserService {
   // ── Dashboard (your existing code — untouched) ────────────────────────────
   async getDashboard(userId: string) {
     const continueLearning = await this.prisma.userProgress.findMany({
-      where: { userId, progressPercent: { gt: 0, lt: 100 } },
+      where: {
+        userId,
+        progressPercent: { gt: 0, lt: 100 },
+      },
       orderBy: { updatedAt: 'desc' },
       take: 5,
       include: { topic: { include: { subject: true } } },
@@ -73,11 +89,16 @@ export class UserService {
     };
   }
 
-  // ── Update profile name ───────────────────────────────────────────────────
-  async updateProfile(userId: string, name: string) {
-    const user = await this.prisma.user.update({
+  // ── Update profile ────────────────────────────────────────────────────────
+  // Controller calls: this.userService.updateProfile(req.user.id, dto)
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    if (!dto.name || dto.name.trim().length < 2) {
+      throw new BadRequestException('Name must be at least 2 characters');
+    }
+
+    return this.prisma.user.update({
       where: { id: userId },
-      data: { name },
+      data: { name: dto.name.trim() },
       select: {
         id: true,
         name: true,
@@ -90,27 +111,23 @@ export class UserService {
         updatedAt: true,
       },
     });
-    return user;
   }
 
   // ── Change password ───────────────────────────────────────────────────────
-  async changePassword(
-    userId: string,
-    currentPassword: string,
-    newPassword: string,
-  ) {
+  // Controller calls: this.userService.changePassword(req.user.id, dto)
+  async changePassword(userId: string, dto: ChangePasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, passwordHash: true },
     });
     if (!user) throw new NotFoundException('User not found');
 
-    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    const valid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
     if (!valid) {
       throw new BadRequestException('Current password is incorrect');
     }
 
-    const newHash = await bcrypt.hash(newPassword, 10);
+    const newHash = await bcrypt.hash(dto.newPassword, 10);
     await this.prisma.user.update({
       where: { id: userId },
       data: { passwordHash: newHash },
@@ -120,6 +137,7 @@ export class UserService {
   }
 
   // ── Get all bookmarks ─────────────────────────────────────────────────────
+  // Controller calls: this.userService.getBookmarks(req.user.id)
   async getBookmarks(userId: string) {
     return this.prisma.bookmark.findMany({
       where: { userId },
@@ -132,24 +150,30 @@ export class UserService {
   }
 
   // ── Add bookmark ──────────────────────────────────────────────────────────
+  // Controller calls: this.userService.addBookmark(userId, topicId, editorialId)
   async addBookmark(
     userId: string,
     topicId?: string,
     editorialId?: string,
   ) {
     // Prevent duplicates
-    const existing = await this.prisma.bookmark.findFirst({
-      where: { userId, topicId: topicId ?? null },
-    });
-    if (existing) return existing;
+    if (topicId) {
+      const existing = await this.prisma.bookmark.findFirst({
+        where: { userId, topicId },
+      });
+      if (existing) return existing;
+    }
 
     return this.prisma.bookmark.create({
       data: { userId, topicId, editorialId },
-      include: { topic: { include: { subject: true } } },
+      include: {
+        topic: { include: { subject: true } },
+      },
     });
   }
 
   // ── Remove bookmark ───────────────────────────────────────────────────────
+  // Controller calls: this.userService.removeBookmark(userId, id)
   async removeBookmark(userId: string, bookmarkId: string) {
     const bookmark = await this.prisma.bookmark.findFirst({
       where: { id: bookmarkId, userId },
@@ -158,48 +182,5 @@ export class UserService {
 
     await this.prisma.bookmark.delete({ where: { id: bookmarkId } });
     return { message: 'Bookmark removed' };
-  }
-
-  // ── Get progress ──────────────────────────────────────────────────────────
-  async getProgress(userId: string) {
-    return this.prisma.userProgress.findMany({
-      where: { userId },
-      orderBy: { lastViewedAt: 'desc' },
-      include: { topic: { include: { subject: true } } },
-    });
-  }
-
-  // ── Update progress ───────────────────────────────────────────────────────
-  async updateProgress(
-    userId: string,
-    topicId: string,
-    progressPercent: number,
-    completed: boolean,
-  ) {
-    return this.prisma.userProgress.upsert({
-      where: { userId_topicId: { userId, topicId } },
-      update: {
-        progressPercent,
-        completed,
-        lastViewedAt: new Date(),
-      },
-      create: {
-        userId,
-        topicId,
-        progressPercent,
-        completed,
-        lastViewedAt: new Date(),
-      },
-    });
-  }
-
-  // ── Get recently viewed ───────────────────────────────────────────────────
-  async getRecentlyViewed(userId: string) {
-    return this.prisma.recentlyViewed.findMany({
-      where: { userId },
-      orderBy: { viewedAt: 'desc' },
-      take: 10,
-      include: { topic: { include: { subject: true } } },
-    });
   }
 }
