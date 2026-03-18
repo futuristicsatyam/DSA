@@ -23,7 +23,7 @@ export class UserController {
   @Get('dashboard')
   @ApiOperation({ summary: 'Get user dashboard data' })
   async getDashboard(@Req() req: any) {
-    return this.userService.getDashboard(req.user.id).then(d => d.progressSummary);
+    return this.userService.getDashboard(req.user.id);
   }
 
   // ── Profile ─────────────────────────────────────────────────────────────────
