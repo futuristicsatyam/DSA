@@ -73,7 +73,7 @@ export class UserController {
   @Get('progress')
   @ApiOperation({ summary: 'Get user progress' })
   async getProgress(@Req() req: any) {
-    return this.userService.getDashboard(req.user.id).then(d => d.progress);
+    return this.userService.getDashboard(req.user.id).then(d => d.progressSummary);
   }
 
   // ── Recently viewed ─────────────────────────────────────────────────────────
