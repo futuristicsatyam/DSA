@@ -165,7 +165,12 @@ export class UserService {
     }
 
     return this.prisma.bookmark.create({
-      data: { userId, topicId, editorialId },
+      data: {
+  userId,
+  topicId,
+  editorialId,
+  type: topicId ? "TOPIC" : "EDITORIAL"
+},
       include: {
         topic: { include: { subject: true } },
       },
