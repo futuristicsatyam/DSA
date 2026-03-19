@@ -12,8 +12,9 @@ import {
 import { useAuth } from '@/contexts/auth-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import dynamic from 'next/dynamic';
 
-export default function DashboardPage() {
+function DashboardPage() {{
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
 
@@ -207,3 +208,4 @@ export default function DashboardPage() {
   );
 }
 
+export default dynamic(() => Promise.resolve(DashboardPage), { ssr: false });
