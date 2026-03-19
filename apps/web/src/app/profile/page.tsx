@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 'use client';
 // apps/web/src/app/profile/page.tsx
 // Safe version — uses the same pattern as your existing pages
